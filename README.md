@@ -199,7 +199,7 @@ https://tech-job-radar-backend.onrender.com/api/jobs
 YouTube: **Sumit's TechEdge**
 
 GitHub:
-https://github.com/YOUR_USERNAME
+https://github.com/sumitraj02
 
 ---
 
@@ -208,7 +208,9 @@ https://github.com/YOUR_USERNAME
 If you find this project useful, consider:
 
 ⭐ Starring the repository
+
 🔗 Sharing the extension
+
 💡 Contributing improvements
 
 ---
