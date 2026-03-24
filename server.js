@@ -1,4 +1,5 @@
-require("dotenv").config(); // 1. MUST BE AT THE TOP
+require("dotenv").config(); // Load environment variables
+
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
@@ -7,39 +8,86 @@ const jobsRoute = require("./routes/jobs");
 
 const app = express();
 
-// Middleware
+/*
+============================
+MIDDLEWARE
+============================
+*/
+
 app.use(cors());
 app.use(express.json());
 
-// 2. Add error handling for the connection
-mongoose.connect(process.env.MONGO_URI)
-  .then(() => console.log("MongoDB Connected..."))
-  .catch(err => console.error("MongoDB connection error:", err));
+/*
+============================
+HEALTH CHECK ROUTE
+============================
+Used by Render / Railway to check server
+*/
 
-// Routes
-app.use("/api/jobs", jobsRoute);
-
-// 3. Use a dynamic port or a constant
-const PORT = process.env.PORT || 5000;
-
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+app.get("/", (req, res) => {
+  res.json({
+    status: "Tech Job Radar API running",
+    version: "1.0"
+  });
 });
 
+/*
+============================
+API ROUTES
+============================
+*/
 
+app.use("/api/jobs", jobsRoute);
 
-const Job = require("./models/jobModel");
+/*
+============================
+DATABASE CONNECTION
+============================
+*/
 
-app.get("/add-job", async (req, res) => {
-  const job = new Job({
-    title: "Google Software Engineer Intern",
-    company: "Google",
-    location: "India",
-    link: "https://careers.google.com",
-    type: "Internship"
+mongoose.connect(process.env.MONGO_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+})
+.then(() => {
+  console.log("MongoDB Connected");
+
+  // Start server only after DB connection
+  startServer();
+})
+.catch(err => {
+  console.error("MongoDB connection error:", err);
+});
+
+/*
+============================
+START SERVER
+============================
+*/
+
+function startServer() {
+
+  const PORT = process.env.PORT || 5000;
+
+  app.listen(PORT, () => {
+    console.log(`🚀 Server running on port ${PORT}`);
   });
 
-  await job.save();
+}
 
-  res.send("Job Added Successfully");
+/*
+============================
+GLOBAL ERROR HANDLER
+============================
+*/
+
+app.use((err, req, res, next) => {
+
+  console.error(err.stack);
+
+  res.status(500).json({
+    success: false,
+    message: "Internal Server Error"
+  });
+
 });
